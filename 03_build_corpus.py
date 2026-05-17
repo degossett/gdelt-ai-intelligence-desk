@@ -8,7 +8,7 @@ import html
 from datetime import datetime
 
 # --- CONFIGURATION ---
-DATA_DIR = r"C:\Users\schli\OneDrive\Documents\gdelt\gdelt_Data"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(DATA_DIR, "gdelt_brain.db")
 
 # Restrict langid to common global languages so it doesn't hallucinate on short headlines
