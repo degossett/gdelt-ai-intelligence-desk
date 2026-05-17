@@ -10,7 +10,7 @@ load_dotenv()
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 
 # --- CONFIGURATION ---
-BASE_DIR = r"C:\Users\schli\OneDrive\Documents\gdelt"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, r"gdelt_Data\gdelt_brain.db")
 
 # Standard 318 English Stop Words (Our unbreakable baseline)
