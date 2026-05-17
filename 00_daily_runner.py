@@ -4,7 +4,7 @@ import time
 from datetime import datetime
 
 # --- CONFIGURATION ---
-BASE_DIR = r"C:\Users\schli\OneDrive\Documents\gdelt"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # List your scripts in the exact order they must run
 # Update these names if your actual file names differ slightly!
