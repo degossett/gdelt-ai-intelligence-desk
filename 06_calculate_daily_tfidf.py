@@ -6,7 +6,7 @@ from collections import defaultdict
 from datetime import datetime
 
 # --- CONFIGURATION ---
-BASE_DIR = r"C:\Users\schli\OneDrive\Documents\gdelt"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, r"gdelt_Data\gdelt_brain.db")
 
 def get_stopwords(cursor):
