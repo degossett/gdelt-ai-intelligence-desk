@@ -32,7 +32,7 @@ jobs:
         run: |
           docker build -t gdelt-ai-desk .
           # We mount the workspace so Docker can read the DB and save the HTML report back to GitHub's runner
-          docker run -v ${{ github.workspace }}:/app -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} gdelt-ai-desk
+          docker run -v ${{ github.workspace }}:/app -e DEEPSEEK_API_KEY=${{ secrets.DEEPSEEK_API_KEY }} gdelt-ai-desk
 
       - name: 📤 Upload Updated Database to Google Cloud
         run: |
