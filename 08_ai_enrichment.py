@@ -11,7 +11,7 @@ load_dotenv()
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 
 # --- CONFIGURATION ---
-BASE_DIR = r"C:\Users\schli\OneDrive\Documents\gdelt"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, r"gdelt_Data\gdelt_brain.db")
 BATCH_SIZE = 100  # How many headlines to send per API call
 TOP_N_TO_SCAN = 15000 # How deep into the daily anomalies we want to look
