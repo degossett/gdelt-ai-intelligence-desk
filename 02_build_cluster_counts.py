@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 
 # --- CONFIGURATION ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "gdelt_Data")
 DB_PATH = os.path.join(DATA_DIR, "gdelt_brain.db")
 CSV_EXPORT_PATH = os.path.join(DATA_DIR, "master_cluster_matrix_30d.csv")
 
