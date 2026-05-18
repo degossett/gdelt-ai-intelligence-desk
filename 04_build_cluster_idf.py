@@ -6,7 +6,8 @@ from datetime import datetime
 
 # --- CONFIGURATION ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, r"gdelt_Data\gdelt_brain.db")
+DATA_DIR = os.path.join(BASE_DIR, "gdelt_Data")
+DB_PATH = os.path.join(DATA_DIR, "gdelt_brain.db")
 
 def get_stopwords(cursor):
     try:
