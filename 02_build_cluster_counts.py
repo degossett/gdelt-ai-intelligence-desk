@@ -5,7 +5,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 # --- CONFIGURATION ---
-DATA_DIR = r"C:\Users\schli\OneDrive\Documents\gdelt\gdelt_Data"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(DATA_DIR, "gdelt_brain.db")
 CSV_EXPORT_PATH = os.path.join(DATA_DIR, "master_cluster_matrix_30d.csv")
 
