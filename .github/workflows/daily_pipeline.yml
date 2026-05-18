@@ -32,7 +32,7 @@ jobs:
         run: |
           docker build -t gdelt-ai-desk .
           # Mount the workspace and pass ALL secrets into the container
-          docker run -v ${{ github.workspace }}:/app -e DEEPSEEK_API_KEY=${{ secrets.DEEPSEEK_API_KEY }} -e EMAIL_APP_PASSWORD=${{ secrets.EMAIL_APP_PASSWORD }} -e MY_SECRET_EMAIL=${{ secrets.MY_SECRET_EMAIL }} -e SENDER_EMAIL=${{ secrets.SENDER_EMAIL }} gdelt-ai-desk
+          docker run -v ${{ github.workspace }}:/app -e DEEPSEEK_API_KEY="${{ secrets.DEEPSEEK_API_KEY }}" -e EMAIL_APP_PASSWORD="${{ secrets.EMAIL_APP_PASSWORD }}" -e MY_SECRET_EMAIL="${{ secrets.MY_SECRET_EMAIL }}" -e SENDER_EMAIL="${{ secrets.SENDER_EMAIL }}" gdelt-ai-desk
       
       - name: 📤 Upload Updated Database to Google Cloud
         run: |
