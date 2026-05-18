@@ -4,7 +4,7 @@ name: Daily GDELT AI Intelligence Desk
 on:
   schedule:
     # Runs automatically at 8:00 AM UTC (4:00 AM Eastern) every day
-    - cron: '0 8 * * *'
+    - cron: '0 7 * * *'
   workflow_dispatch: # This adds a "Run Now" button so you can trigger it manually!
 
 jobs:
