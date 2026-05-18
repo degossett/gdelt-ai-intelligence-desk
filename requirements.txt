@@ -1,5 +1,10 @@
-gdelt
+pandas
+numpy
 requests
 beautifulsoup4
+gdelt
 openai
-python-dotenv
+tqdm
+langid
+scikit-learn
+networkx
