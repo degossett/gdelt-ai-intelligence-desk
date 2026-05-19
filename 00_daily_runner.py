@@ -20,7 +20,7 @@ PIPELINE_SCRIPTS = [
         # "08_ai_enrichment.py",
         # "09_ai_cluster_editor.py",
         "10_build_ai_report.py",
-        "11_send_email.py"
+        "11_email_report.py"
     ]
 
 def run_pipeline():
