@@ -17,8 +17,8 @@ PIPELINE_SCRIPTS = [
         # "05_build_rolling_idf.py",
         # "06_calculate_daily_tfidf.py",
         # "07_score_headlines.py",
-        # "08_ai_enrichment.py",
-        # "09_ai_cluster_editor.py",
+        "08_ai_enrichment.py",
+        "09_ai_cluster_editor.py",
         "10_build_ai_report.py",
         "11_email_report.py"
     ]
