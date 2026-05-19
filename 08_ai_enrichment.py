@@ -16,6 +16,7 @@ DATA_DIR = os.path.join(BASE_DIR, "gdelt_Data")
 DB_PATH = os.path.join(DATA_DIR, "gdelt_brain.db")
 BATCH_SIZE = 100  # How many headlines to send per API call
 TOP_N_TO_SCAN = 15000 # How deep into the daily anomalies we want to look
+PROMPT_PATH = os.path.join(BASE_DIR, "topic_filter.md")
 
 def chunk_list(data_list, chunk_size):
     """Yield successive chunks from a list."""
@@ -56,29 +57,9 @@ def enrich_ai_data():
     client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url="https://api.deepseek.com")
     
     # 3. The Sorter Prompt
-    system_prompt = """
-    You are a highly accurate data classification engine for an intelligence agency.
-    Your only job is to read a list of news headlines and determine if they are fundamentally about Artificial Intelligence.
-    
-    CRITERIA FOR "TRUE":
-    - Mentions AI, Machine Learning, Neural Networks, LLMs.
-    - Mentions AI companies (OpenAI, Anthropic, DeepMind, Mistral, xAI).
-    - Mentions semiconductor/hardware crucial to AI (Nvidia, TSMC).
-    - Mentions AI regulation, legislation, or copyright lawsuits.
-    
-    CRITERIA FOR "FALSE":
-    - General tech news (Apple selling iPhones, standard cybersecurity, video games).
-    - Elon Musk doing things unrelated to AI (e.g., SpaceX, Tesla cars).
-    - Cryptocurrencies or blockchain (unless specifically tied to an AI model).
-    
-    You MUST return strictly valid JSON in this exact format:
-    {
-        "results": [
-            {"id": "the_id_provided", "is_ai": true},
-            {"id": "the_id_provided", "is_ai": false}
-        ]
-    }
-    """
+   # 3. Read the Sorter Prompt from the markdown file
+    with open(PROMPT_PATH, 'r', encoding='utf-8') as f:
+        system_prompt = f.read()
 
     total_ai_found = 0
 
