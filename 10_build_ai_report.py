@@ -99,3 +99,27 @@ def build_ai_ui():
                 
             html_content += f"""
                 <li class="source-item">
+                    <a href="{data['url']}" target="_blank" class="source-link">{data['headline']}</a>
+                    <span class="anomaly-score">(Source: {domain} | Score: {score_display})</span>
+                </li>
+            """
+        
+        html_content += """
+            </ul>
+        </div>
+        """
+
+    html_content += """
+    </body>
+    </html>
+    """
+
+    # 5. Save the file (Hard Overwrite)
+    with open(HTML_PATH, 'w', encoding='utf-8') as f:
+        f.write(html_content)
+
+    conn.close()
+    print(f"✅ Success! Report generated at: {HTML_PATH}")
+
+if __name__ == '__main__':
+    build_ai_ui()
