@@ -8,20 +8,20 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # List your scripts in the exact order they must run
 # Update these names if your actual file names differ slightly!
-PIPELINE_SCRIPTS = [
-    # run_script("01_download_gdelt.py")
-    # run_script("02_build_cluster_counts.py")
-    # run_script("03_build_corpus.py")
-    # run_script("03a_dynamic_stopwords.py")
-    # run_script("04_build_cluster_idf.py")
-    # run_script("05_build_rolling_idf.py")
-    # run_script("06_calculate_daily_tfidf.py")
-    # run_script("07_score_headlines.py")
-    # run_script("08_ai_enrichment.py")
-    # run_script("09_ai_cluster_editor.py")
-    run_script("10_build_ai_report.py")
-    run_script("11_send_email.py")
-]
+scripts_to_run = [
+        # "01_download_gdelt.py",
+        # "02_build_cluster_counts.py",
+        # "03_build_corpus.py",
+        # "03a_dynamic_stopwords.py",
+        # "04_build_cluster_idf.py",
+        # "05_build_rolling_idf.py",
+        # "06_calculate_daily_tfidf.py",
+        # "07_score_headlines.py",
+        # "08_ai_enrichment.py",
+        # "09_ai_cluster_editor.py",
+        "10_build_ai_report.py",
+        "11_send_email.py"
+    ]
 
 def run_pipeline():
     print(f"==================================================")
