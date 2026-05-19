@@ -21,7 +21,7 @@ Want to track Biotech, Space Exploration, Crypto Markets, or Global Supply Chain
    * Dictate the tone and depth of the final briefing summaries.
 
 ## 🚀 The Daily Pipeline
-Every morning at 1:00 AM Mountain Time, the GitHub Actions orchestrator triggers `.github/workflows/daily_pipeline.yml`, which executes the following steps:
+Every day, the GitHub Actions orchestrator triggers `.github/workflows/daily_pipeline.yml`, which executes the following steps:
 
 1. **Cloud Authentication:** Logs into Google Cloud and downloads the historical SQLite memory bank.
 2. **Containerization:** Builds an isolated Docker environment and installs all Python dependencies.
@@ -33,10 +33,10 @@ Every morning at 1:00 AM Mountain Time, the GitHub Actions orchestrator triggers
 8. **Delivery:** Injects the HTML directly into the body of an email and sends it to the executive inbox.
 9. **Memory Sync:** Uploads the updated SQLite database back to Google Cloud Storage so the AI remembers today's baseline for tomorrow.
 
-## 🔐 Required GitHub Secrets
-To run this pipeline in your own repository, you must configure the following in your GitHub Actions Secrets vault:
-* `GCP_CREDENTIALS` (Service account JSON for Google Cloud Storage access)
-* `DEEPSEEK_API_KEY` (Your DeepSeek API key)
-* `SENDER_EMAIL` (The Gmail address sending the report)
-* `EMAIL_APP_PASSWORD` (Your 16-character Google App Password)
-* `MY_SECRET_EMAIL` (The executive inbox receiving the report)
+## ⏰ Changing the Schedule
+By default, GitHub Actions operate on **UTC time**. To change when your intelligence desk wakes up, open your workflow file (e.g., `.github/workflows/daily_pipeline.yml`) and modify the `cron` schedule string at the top of the file.
+
+```yaml
+on:
+  schedule:
+    - cron: '0 7 * * *' # Runs at 7:00 AM UTC
