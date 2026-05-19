@@ -47,4 +47,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Daily-AI-Intelligence-Briefing
-          path: ./*.html oh please I come bearing gifts
+          path: ./*.html
