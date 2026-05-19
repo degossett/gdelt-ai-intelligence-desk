@@ -65,7 +65,7 @@ def generate_ai_briefs():
         "topics": [
             {{
                 "topic_name": "Clear name of the event",
-                "summary": "3-to-4 sentence summary.",
+                "summary": "5-to-7 sentence summary.",
                 "article_ids": ["id1", "id2"]
             }}
         ]
