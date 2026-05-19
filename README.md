@@ -19,6 +19,19 @@ Want to track Biotech, Space Exploration, Crypto Markets, or Global Supply Chain
    * Rewrite the "True" and "False" classification criteria to tell the AI exactly what constitutes a relevant headline for your new field.
 2. **`editorial_guidelines.md`:** * Update the guidelines to tell the AI what makes a story "highly interesting" or "important" in your new industry (e.g., FDA approvals for Biotech, or rocket launches for Space). 
    * Dictate the tone and depth of the final briefing summaries.
+  
+## 🔐 Setting Up Your Secret Vault
+To run this pipeline in your own repository, you must store your API keys and passwords securely. **Never hardcode these into your scripts.**
+
+1. In your GitHub repository, click on the **Settings** tab.
+2. On the left sidebar, scroll down to **Secrets and variables** and click **Actions**.
+3. Click the green **New repository secret** button and add the following exactly as spelled:
+
+* `DEEPSEEK_API_KEY`: Your DeepSeek API key for AI generation.
+* `EMAIL_APP_PASSWORD`: The 16-character Google App Password for the sender email (no spaces).
+* `GCP_CREDENTIALS`: The entire contents of your Service Account JSON file for Google Cloud Storage access.
+* `MY_SECRET_EMAIL`: The executive inbox receiving the report (e.g., *you@company.com*).
+* `SENDER_EMAIL`: The Gmail address sending the report (e.g., *yourbot@gmail.com*).
 
 ## 🚀 The Daily Pipeline
 Every day, the GitHub Actions orchestrator triggers `.github/workflows/daily_pipeline.yml`, which executes the following steps:
