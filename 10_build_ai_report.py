@@ -8,13 +8,22 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "gdelt_Data")
 DB_PATH = os.path.join(DATA_DIR, "gdelt_brain.db")
 HTML_PATH = os.path.join(BASE_DIR, f"GDELT_AI_Briefing_{datetime.now().strftime('%Y-%m-%d')}.html")
+PROMPT_PATH = os.path.join(BASE_DIR, "topic_filter.md")
 
 def build_ai_ui():
-    print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Starting Step 10: Building AI Executive Briefing HTML...")
+    print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Starting Step 10: Building Executive Briefing HTML...")
     
     today_str = datetime.now().strftime('%Y-%m-%d')
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
+
+    # --- DYNAMIC TOPIC EXTRACTION ---
+    topic_name = "Global Events" # Default fallback
+    if os.path.exists(PROMPT_PATH):
+        with open(PROMPT_PATH, 'r', encoding='utf-8') as f:
+            first_line = f.readline().strip()
+            if first_line.startswith("TOPIC:"):
+                topic_name = first_line.replace("TOPIC:", "").strip()
 
     # 1. Fetch AI clusters
     cursor.execute('''
@@ -26,7 +35,7 @@ def build_ai_ui():
     clusters = cursor.fetchall()
 
     if not clusters:
-        print("❌ No AI clusters found for today. Make sure Step 08 (DeepSeek) ran successfully.")
+        print("❌ No clusters found for today. Make sure Step 08 (DeepSeek) ran successfully.")
         conn.close()
         return
 
@@ -42,13 +51,13 @@ def build_ai_ui():
         if gkg_id not in article_lookup:
             article_lookup[gkg_id] = {"url": url, "headline": headline, "score": score}
 
-    # 3. Build the HTML Header
+    # 3. Build the HTML Header (NOW DYNAMIC!)
     html_content = f"""
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>GDELT AI Executive Briefing - {today_str}</title>
+        <title>GDELT Executive Briefing: {topic_name} - {today_str}</title>
         <style>
             body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; line-height: 1.6; margin: 0; padding: 20px 50px; }}
             h1 {{ color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }}
@@ -66,7 +75,7 @@ def build_ai_ui():
         </style>
     </head>
     <body>
-        <h1>🌐 GDELT AI Executive Briefing</h1>
+        <h1>🌐 GDELT Executive Briefing: {topic_name}</h1>
         <div class="header-info"><strong>Date:</strong> {today_str} | <strong>Top Events Identified:</strong> {len(clusters)}</div>
     """
 
