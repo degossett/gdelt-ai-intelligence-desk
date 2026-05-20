@@ -30,7 +30,7 @@ def send_email():
                 topic_name = first_line.replace("TOPIC:", "").strip()
 
     # 1. Find today's HTML report in the main folder
-    search_pattern = os.path.join(BASE_DIR, "GDELT_AI_Briefing_*.html")
+    search_pattern = os.path.join(BASE_DIR, "GDELT_Briefing_*.html")
     html_files = glob.glob(search_pattern)
     
     if not html_files:
