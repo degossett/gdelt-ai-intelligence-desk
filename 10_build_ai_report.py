@@ -7,11 +7,11 @@ from urllib.parse import urlparse
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "gdelt_Data")
 DB_PATH = os.path.join(DATA_DIR, "gdelt_brain.db")
-HTML_PATH = os.path.join(BASE_DIR, f"GDELT_AI_Briefing_{datetime.now().strftime('%Y-%m-%d')}.html")
+HTML_PATH = os.path.join(BASE_DIR, f"GDELT_Briefing_{datetime.now().strftime('%Y-%m-%d')}.html")
 PROMPT_PATH = os.path.join(BASE_DIR, "topic_filter.md")
 
 def build_ai_ui():
-    print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Starting Step 10: Building Executive Briefing HTML...")
+    print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Starting Step 10: Building Mobile-Friendly Briefing...")
     
     today_str = datetime.now().strftime('%Y-%m-%d')
     conn = sqlite3.connect(DB_PATH)
@@ -35,7 +35,7 @@ def build_ai_ui():
     clusters = cursor.fetchall()
 
     if not clusters:
-        print("❌ No clusters found for today. Make sure Step 08 (DeepSeek) ran successfully.")
+        print("❌ No clusters found for today.")
         conn.close()
         return
 
@@ -51,41 +51,42 @@ def build_ai_ui():
         if gkg_id not in article_lookup:
             article_lookup[gkg_id] = {"url": url, "headline": headline, "score": score}
 
-    # 3. Build the HTML Header (NOW DYNAMIC!)
+    # 3. Build the Mobile-Optimized HTML Header
+    # We added the viewport meta tag and stripped out the heavy CSS padding/shadows.
     html_content = f"""
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>GDELT Executive Briefing: {topic_name} - {today_str}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>GDELT Briefing: {topic_name}</title>
         <style>
-            body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; color: #333; line-height: 1.6; margin: 0; padding: 20px 50px; }}
-            h1 {{ color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }}
-            .header-info {{ font-size: 1.1em; color: #7f8c8d; margin-bottom: 30px; }}
-            .cluster-card {{ background: #fff; border-radius: 8px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-left: 6px solid #3498db; }}
-            .cluster-title {{ font-size: 1.5em; color: #2980b9; margin-top: 0; margin-bottom: 10px; }}
-            .cluster-summary {{ font-size: 1.1em; color: #34495e; background: #ecf0f1; padding: 15px; border-radius: 5px; margin-bottom: 20px; font-style: italic; }}
-            .sources-title {{ font-weight: bold; margin-bottom: 10px; color: #7f8c8d; text-transform: uppercase; font-size: 0.9em; letter-spacing: 1px; }}
+            body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #ffffff; color: #1a1a1a; line-height: 1.5; margin: 0; padding: 15px; font-size: 16px; }}
+            h1 {{ color: #0056b3; font-size: 22px; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 5px; line-height: 1.2; }}
+            .header-info {{ font-size: 14px; color: #555; margin-bottom: 25px; }}
+            .cluster-card {{ margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee; }}
+            .cluster-title {{ font-size: 18px; color: #000; margin-top: 0; margin-bottom: 8px; }}
+            .cluster-summary {{ font-size: 15px; color: #333; margin-bottom: 15px; }}
+            .sources-title {{ font-size: 12px; font-weight: bold; color: #666; text-transform: uppercase; margin-bottom: 8px; }}
             .source-list {{ list-style-type: none; padding: 0; margin: 0; }}
-            .source-item {{ margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #eee; }}
-            .source-item:last-child {{ border-bottom: none; margin-bottom: 0; padding-bottom: 0; }}
-            .source-link {{ color: #e74c3c; text-decoration: none; font-weight: 500; }}
+            .source-item {{ margin-bottom: 10px; font-size: 14px; }}
+            .source-link {{ color: #0056b3; text-decoration: none; font-weight: 500; display: block; margin-bottom: 2px; }}
             .source-link:hover {{ text-decoration: underline; }}
-            .anomaly-score {{ font-family: monospace; color: #95a5a6; font-size: 0.9em; margin-left: 10px; }}
+            .anomaly-score {{ color: #888; font-size: 12px; }}
         </style>
     </head>
     <body>
-        <h1>🌐 GDELT Executive Briefing: {topic_name}</h1>
-        <div class="header-info"><strong>Date:</strong> {today_str} | <strong>Top Events Identified:</strong> {len(clusters)}</div>
+        <h1>{topic_name}</h1>
+        <div class="header-info">Date: {today_str} | Events: {len(clusters)}</div>
     """
 
     # 4. Inject Clusters into HTML
     for rank, name, summary, ids_str in clusters:
         html_content += f"""
         <div class="cluster-card">
-            <h2 class="cluster-title">Topic: {name}</h2>
-            <div class="cluster-summary"><strong>Quick Hit:</strong> {summary}</div>
-            <div class="sources-title">Relevant Articles:</div>
+            <h2 class="cluster-title">{rank}. {name}</h2>
+            <div class="cluster-summary">{summary}</div>
+            <div class="sources-title">Key Sources</div>
             <ul class="source-list">
         """
         
@@ -93,14 +94,11 @@ def build_ai_ui():
         article_ids = [aid.strip() for aid in ids_str.split(',') if aid.strip()]
         topic_articles = [article_lookup[aid] for aid in article_ids if aid in article_lookup]
                 
-        # --- THE CAP: Sort by anomaly score and keep only top 3 ---
+        # Keep only top 3 by anomaly score
         topic_articles = sorted(topic_articles, key=lambda x: x['score'], reverse=True)[:3]
         
         # Add the articles to the HTML
         for data in topic_articles:
-            score_display = f"{data['score']:.2f}"
-            
-            # Basic domain extraction for the source name
             try:
                 domain = urlparse(data['url']).netloc.replace('www.', '')
             except:
@@ -109,7 +107,7 @@ def build_ai_ui():
             html_content += f"""
                 <li class="source-item">
                     <a href="{data['url']}" target="_blank" class="source-link">{data['headline']}</a>
-                    <span class="anomaly-score">(Source: {domain} | Score: {score_display})</span>
+                    <span class="anomaly-score">{domain} (Score: {data['score']:.2f})</span>
                 </li>
             """
         
@@ -123,12 +121,12 @@ def build_ai_ui():
     </html>
     """
 
-    # 5. Save the file (Hard Overwrite)
+    # 5. Save the file
     with open(HTML_PATH, 'w', encoding='utf-8') as f:
         f.write(html_content)
 
     conn.close()
-    print(f"✅ Success! Report generated at: {HTML_PATH}")
+    print(f"✅ Success! Mobile report generated at: {HTML_PATH}")
 
 if __name__ == '__main__':
     build_ai_ui()
