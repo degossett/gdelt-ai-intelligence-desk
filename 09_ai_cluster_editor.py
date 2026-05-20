@@ -12,7 +12,7 @@ GUIDELINES_PATH = os.path.join(BASE_DIR, "editorial_guidelines.md")
 DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY")
 
 def edit_clusters():
-    print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Starting Step 09: AI Editorial Review (With Fixed ID Tracking)...")
+    print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Starting Step 09: AI Editorial Review (Using RowID Shield)...")
     
     if not DEEPSEEK_API_KEY:
         print("❌ ERROR: DEEPSEEK_API_KEY environment variable not set.")
@@ -45,9 +45,10 @@ def edit_clusters():
             for name, summary in old_clusters:
                 yesterday_context += f"- {name}: {summary}\n"
 
-    # --- 2. FETCH TODAY'S RAW CLUSTERS ---
+    # --- 2. FETCH TODAY'S RAW CLUSTERS (Using implicit rowid) ---
+    print("Fetching today's raw clusters using database rowid...")
     cursor.execute('''
-        SELECT id, raw_cluster_name, cluster_keywords, cluster_size 
+        SELECT rowid, raw_cluster_name, cluster_keywords, cluster_size 
         FROM daily_ai_clusters 
         WHERE date = ?
     ''', (today_str,))
@@ -66,24 +67,25 @@ def edit_clusters():
 
     # --- 4. PREPARE THE DATA FOR DEEPSEEK ---
     cluster_data_for_prompt = []
-    for cluster_id, raw_name, keywords, size in today_clusters:
+    for cluster_rowid, raw_name, keywords, size in today_clusters:
+        # We look up headlines matching this specific row's cluster properties
         cursor.execute('''
             SELECT headline 
             FROM daily_headline_scores 
-            WHERE cluster_id = ? AND date = ?
+            WHERE date = ? 
+            AND cluster_id = (SELECT rowid FROM daily_ai_clusters WHERE rowid = ? AND date = ?)
             LIMIT 15
-        ''', (cluster_id, today_str))
+        ''', (today_str, cluster_rowid, today_str))
         headlines = [row[0] for row in cursor.fetchall()]
         
         cluster_data_for_prompt.append({
-            "id": cluster_id,
+            "id": cluster_rowid,  # DeepSeek sees this as a clean integer ID
             "raw_name": raw_name,
             "keywords": keywords,
             "size": size,
             "headlines": headlines
         })
 
-    # Strict ID alignment rules added below
     system_prompt = f"""
     You are the Chief Editor for an intelligence desk. 
     You are reviewing today's clustered data to write an executive briefing.
@@ -137,18 +139,18 @@ def edit_clusters():
         
         print("📥 AI Response received. Syncing back to database...")
         
-        # --- 5. UPDATE THE DATABASE ---
+        # --- 5. UPDATE THE DATABASE USING THE MATCHED ROWID ---
         rows_updated = 0
         for item in parsed_data.get("edited_clusters", []):
             cursor.execute('''
                 UPDATE daily_ai_clusters
                 SET topic_name = ?, summary = ?, topic_rank = ?
-                WHERE id = ? AND date = ?
+                WHERE rowid = ? AND date = ?
             ''', (item['topic_name'], item['summary'], item['topic_rank'], item['id'], today_str))
             rows_updated += cursor.rowcount
         
         conn.commit()
-        print(f"✅ Successfully matched and updated {rows_updated} database rows!")
+        print(f"✅ Successfully matched and updated {rows_updated} database rows via RowID!")
         
     except Exception as e:
         print(f"❌ ERROR connecting to DeepSeek or parsing JSON: {e}")
