@@ -1,4 +1,4 @@
-name: Daily GDELT Oil & Gas Desk
+name: Daily GDELT AI Intelligence Desk
 
 # When should this run?
 on:
@@ -26,7 +26,7 @@ jobs:
       - name: 💾 Download Database from Google Cloud
         run: |
           mkdir -p gdelt_Data
-          gcloud storage cp gs://gdelt-intelligence-bucket/oil_gas_brain.db ./gdelt_Data/gdelt_brain.db || echo "No existing DB found."
+          gcloud storage cp gs://gdelt-intelligence-bucket/gdelt_brain.db ./gdelt_Data/gdelt_brain.db || echo "No existing DB found."
 
       - name: 🐳 Build and Run Docker Container
         run: |
@@ -41,7 +41,7 @@ jobs:
       
       - name: 📤 Upload Updated Database to Google Cloud
         run: |
-          gcloud storage cp ./gdelt_Data/gdelt_brain.db gs://gdelt-intelligence-bucket/oil_gas_brain.db
+          gcloud storage cp ./gdelt_Data/gdelt_brain.db gs://gdelt-intelligence-bucket/gdelt_brain.db
 
       - name: Save AI Briefing HTML Report
         uses: actions/upload-artifact@v4
