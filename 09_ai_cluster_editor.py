@@ -12,7 +12,7 @@ GUIDELINES_PATH = os.path.join(BASE_DIR, "editorial_guidelines.md")
 DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY")
 
 def edit_clusters():
-    print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Starting Step 09: AI Editorial Review (With Memory)...")
+    print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Starting Step 09: AI Editorial Review (With Fixed ID Tracking)...")
     
     if not DEEPSEEK_API_KEY:
         print("❌ ERROR: DEEPSEEK_API_KEY environment variable not set.")
@@ -23,7 +23,6 @@ def edit_clusters():
     cursor = conn.cursor()
 
     # --- 1. FETCH THE AI'S MEMORY (YESTERDAY'S REPORT) ---
-    # Find the most recent date in the DB that is NOT today
     cursor.execute('''
         SELECT DISTINCT date FROM daily_ai_clusters 
         WHERE date < ? 
@@ -45,8 +44,6 @@ def edit_clusters():
             yesterday_context = f"PREVIOUS REPORT TOPICS ({last_date}):\n"
             for name, summary in old_clusters:
                 yesterday_context += f"- {name}: {summary}\n"
-    
-    print(f"🧠 Loaded Memory:\n{yesterday_context}")
 
     # --- 2. FETCH TODAY'S RAW CLUSTERS ---
     cursor.execute('''
@@ -86,7 +83,7 @@ def edit_clusters():
             "headlines": headlines
         })
 
-    # Notice the new "YOUR MEMORY" injection in the prompt below
+    # Strict ID alignment rules added below
     system_prompt = f"""
     You are the Chief Editor for an intelligence desk. 
     You are reviewing today's clustered data to write an executive briefing.
@@ -96,23 +93,25 @@ def edit_clusters():
     
     YOUR MEMORY (CRITICAL):
     {yesterday_context}
-    DO NOT report on the exact same events as the Previous Report unless there is a MASSIVE, brand-new development today. If a cluster is just lingering coverage of yesterday's news, down-rank its importance or write the summary to explicitly highlight only the NEW updates.
+    DO NOT report on the exact same events as the Previous Report unless there is a MASSIVE, brand-new development today.
 
-    Read the provided JSON list of today's clusters. 
-    For each cluster, provide:
-    1. "topic_name": A clean, executive title.
-    2. "summary": A dense, analytical summary (3-4 sentences) following the guidelines.
-    3. "topic_rank": Rank them from 1 to N (1 being the most important).
+    TASK:
+    Read the provided JSON list of today's clusters. For each item, you must preserve its tracking ID.
+    Provide:
+    1. "id": The EXACT, unmodified integer ID provided in the input data. Do not re-number this!
+    2. "topic_name": A clean, executive title.
+    3. "summary": A dense, analytical summary (3-4 sentences).
+    4. "topic_rank": Rank them from 1 to N (1 being most important).
 
     You MUST return strictly valid JSON in this exact format:
     {{
         "edited_clusters": [
-            {{"id": 1, "topic_name": "Title", "summary": "Summary text", "topic_rank": 1}}
+            {{"id": 999, "topic_name": "Title", "summary": "Summary text", "topic_rank": 1}}
         ]
     }}
     """
 
-    print("🚀 Sending today's data to DeepSeek for analysis...")
+    print("🚀 Sending data to DeepSeek...")
     
     headers = {
         "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
@@ -136,16 +135,20 @@ def edit_clusters():
         content = result_json['choices'][0]['message']['content']
         parsed_data = json.loads(content)
         
+        print("📥 AI Response received. Syncing back to database...")
+        
         # --- 5. UPDATE THE DATABASE ---
+        rows_updated = 0
         for item in parsed_data.get("edited_clusters", []):
             cursor.execute('''
                 UPDATE daily_ai_clusters
                 SET topic_name = ?, summary = ?, topic_rank = ?
                 WHERE id = ? AND date = ?
             ''', (item['topic_name'], item['summary'], item['topic_rank'], item['id'], today_str))
+            rows_updated += cursor.rowcount
         
         conn.commit()
-        print("✅ Successfully updated clusters with AI editorial review!")
+        print(f"✅ Successfully matched and updated {rows_updated} database rows!")
         
     except Exception as e:
         print(f"❌ ERROR connecting to DeepSeek or parsing JSON: {e}")
