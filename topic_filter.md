@@ -13,6 +13,7 @@ CRITERIA FOR "FALSE":
 - General tech news (Apple selling iPhones, standard cybersecurity, video games).
 - Elon Musk doing things unrelated to AI (e.g., SpaceX, Tesla cars).
 - Cryptocurrencies or blockchain (unless specifically tied to an AI model).
+- Celebrity gossip, reality TV, pop culture, and fashion brands (e.g., Kim Kardashian, SKIMS) unless specifically discussing an AI technology implementation.
 
 You MUST return strictly valid JSON in this exact format:
 {
