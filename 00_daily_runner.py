@@ -9,16 +9,16 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # List your scripts in the exact order they must run
 # Update these names if your actual file names differ slightly!
 PIPELINE_SCRIPTS = [
-        "01_download_gdelt.py",
-        "02_build_cluster_counts.py",
-        "03_build_corpus.py",
-        "03a_dynamic_stopwords.py",
-        "04_build_cluster_idf.py",
-        "05_build_rolling_idf.py",
-        "06_calculate_daily_tfidf.py",
-        "07_score_headlines.py",
-        "08_ai_enrichment.py",
-        "09_ai_cluster_editor.py",
+        #"01_download_gdelt.py",
+        #"02_build_cluster_counts.py",
+        #"03_build_corpus.py",
+        #"03a_dynamic_stopwords.py",
+        #"04_build_cluster_idf.py",
+        #"05_build_rolling_idf.py",
+        #"06_calculate_daily_tfidf.py",
+        #"07_score_headlines.py",
+        #"08_ai_enrichment.py",
+        #"09_ai_cluster_editor.py",
         "10_build_ai_report.py",
         "11_email_report.py"
     ]
