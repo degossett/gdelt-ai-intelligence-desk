@@ -1,9 +1,9 @@
-name: Daily GDELT AI Intelligence Desk
+name: Daily GDELT Oil & Gas Desk
 
 # When should this run?
 on:
   schedule:
-    # Runs automatically at 8:00 AM UTC (4:00 AM Eastern) every day
+    # Runs automatically at 7:00 AM UTC every day
     - cron: '0 7 * * *'
   workflow_dispatch: # This adds a "Run Now" button so you can trigger it manually!
 
@@ -26,7 +26,7 @@ jobs:
       - name: 💾 Download Database from Google Cloud
         run: |
           mkdir -p gdelt_Data
-          gcloud storage cp gs://gdelt-intelligence-bucket/gdelt_brain.db ./gdelt_Data/gdelt_brain.db
+          gcloud storage cp gs://gdelt-intelligence-bucket/oil_gas_brain.db ./gdelt_Data/gdelt_brain.db || echo "No existing DB found."
 
       - name: 🐳 Build and Run Docker Container
         run: |
@@ -41,10 +41,10 @@ jobs:
       
       - name: 📤 Upload Updated Database to Google Cloud
         run: |
-          gcloud storage cp ./gdelt_Data/gdelt_brain.db gs://gdelt-intelligence-bucket/gdelt_brain.db
+          gcloud storage cp ./gdelt_Data/gdelt_brain.db gs://gdelt-intelligence-bucket/oil_gas_brain.db
 
-      - name: 📊 Save AI Briefing HTML Report
+      - name: Save AI Briefing HTML Report
         uses: actions/upload-artifact@v4
         with:
-          name: Daily-AI-Intelligence-Briefing
-          path: ./*.html
+          name: daily-briefing
+          path: GDELT_Briefing_*.html
