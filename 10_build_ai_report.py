@@ -84,7 +84,7 @@ def build_ai_ui():
     for rank, name, summary, ids_str in clusters:
         html_content += f"""
         <div class="cluster-card">
-            <h2 class="cluster-title">{rank}. {name}</h2>
+            <h2 class="cluster-title">Topic: {name}</h2>
             <div class="cluster-summary">{summary}</div>
             <div class="sources-title">Key Sources</div>
             <ul class="source-list">
