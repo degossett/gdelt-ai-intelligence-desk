@@ -6,6 +6,9 @@ from datetime import datetime
 # --- CONFIGURATION ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# 🪓 TEMPORARY SURGICAL CLEANUP (Delete or comment out after this run!)
+os.system("python 02.2_surgical_clean.py")
+
 # List your scripts in the exact order they must run
 # Update these names if your actual file names differ slightly!
 PIPELINE_SCRIPTS = [
