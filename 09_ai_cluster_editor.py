@@ -36,7 +36,7 @@ def generate_ai_briefs():
         print(f"❌ Error: {GUIDELINES_PATH} not found!")
         sys.exit(1)
 
-    # --- 2. FETCH THE AI'S MEMORY (YESTERDAY'S REPORT) ---
+    # --- 2. FETCH THE AI'S MEMORY (YESTERDAY'S REPORT TITLES ONLY) ---
     print("🧠 Checking database for previous report memory...")
     # Safe check to see if the table even exists yet
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='daily_ai_clusters'")
@@ -53,17 +53,18 @@ def generate_ai_briefs():
         
         if last_date_row:
             last_date = last_date_row[0]
+            # ONLY fetch the topic names, skipping the summaries completely!
             cursor.execute('''
-                SELECT topic_name, summary 
+                SELECT topic_name 
                 FROM daily_ai_clusters 
                 WHERE date = ?
             ''', (last_date,))
             old_clusters = cursor.fetchall()
             
             if old_clusters:
-                yesterday_context = f"PREVIOUS REPORT TOPICS ({last_date}):\n"
-                for name, summary in old_clusters:
-                    yesterday_context += f"- {name}: {summary}\n"
+                yesterday_context = f"YESTERDAY'S TOPICS ({last_date}):\n"
+                for row in old_clusters:
+                    yesterday_context += f"- {row[0]}\n"
     
     print(f"Loaded Memory Context:\n{yesterday_context}")
 
@@ -102,10 +103,10 @@ def generate_ai_briefs():
     {editorial_wiki}
     --- END EDITORIAL WIKI ---
     
-    --- START MEMORY (CRITICAL) ---
+    --- START HARD BLACKLIST (YESTERDAY'S NEWS) ---
     {yesterday_context}
-    DO NOT report on the exact same events as the Previous Report unless there is a MASSIVE, brand-new development today. Focus on new events.
-    --- END MEMORY ---
+    CRITICAL RULE: You are strictly forbidden from writing about the topics listed above. Do not include them in your output unless there is a MASSIVE, fundamentally new geopolitical development today. If it is just lingering syndication of yesterday's news, IGNORE IT completely.
+    --- END HARD BLACKLIST ---
     
     You MUST return your answer in strictly valid JSON format exactly matching this schema:
     {{
