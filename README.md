@@ -44,7 +44,8 @@ Every day, the GitHub Actions orchestrator triggers `.github/workflows/daily_pip
 6. **AI Enrichment:** Passes the sequenced clusters back to DeepSeek for deep analysis and summarization according to `editorial_guidelines.md`.
 7. **Report Generation:** Compiles the AI analysis into a beautifully formatted, dynamic HTML briefing.
 8. **Delivery:** Injects the HTML directly into the body of an email and sends it to the executive inbox.
-9. **Memory Sync:** Uploads the updated SQLite database back to Google Cloud Storage so the AI remembers today's baseline for tomorrow.
+9. **Database Optimization:** Executes a daily cleanup script (`12_database_cleanup.py`) that purges records older than 30 days and compresses the SQLite database (`VACUUM`) to prevent cloud bloat.
+10. **Memory Sync:** Uploads the updated, compressed SQLite database back to Google Cloud Storage so the AI remembers today's baseline for tomorrow.
 
 ## ⏰ Changing the Schedule
 By default, GitHub Actions operate on **UTC time**. To change when your intelligence desk wakes up, open your workflow file (e.g., `.github/workflows/daily_pipeline.yml`) and modify the `cron` schedule string at the top of the file.
