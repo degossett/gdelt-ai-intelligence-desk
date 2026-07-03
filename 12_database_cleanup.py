@@ -5,52 +5,75 @@ from datetime import datetime, timedelta
 
 # --- CONFIGURATION ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(BASE_DIR, "gdelt_Data")
-DB_PATH = os.path.join(DATA_DIR, "gdelt_brain.db")
-RETENTION_DAYS = 30
+DB_PATH = os.path.join(BASE_DIR, "gdelt_Data", "gdelt_brain.db")
 
 def cleanup_database():
-    print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Starting Step 12: Database Retention & Optimization...")
+    print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Starting Step 12: Database Surgery & Optimization...")
     
     if not os.path.exists(DB_PATH):
-        print("⚠️ Database not found. Skipping cleanup.")
+        print(f"⚠️ Database not found at {DB_PATH}. Skipping cleanup.")
         return
 
-    # 1. Calculate file size before cleanup
     size_before_mb = os.path.getsize(DB_PATH) / (1024 * 1024)
     print(f"📦 Database size before cleanup: {size_before_mb:.2f} MB")
 
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
-    # 2. Establish the 30-day cutoff
-    cutoff_date = (datetime.now() - timedelta(days=RETENTION_DAYS)).strftime('%Y-%m-%d')
-    print(f"🧹 Purging all records older than: {cutoff_date}...")
-
-    # 3. Purge old data from the heavy tables
-    tables_to_clean = [
+    # --- 1. NUKE THE DAILY SCRATCHPADS (0 Days Retention) ---
+    print("\n🗑️ Emptying daily scratchpad tables...")
+    scratchpad_tables = [
         "article_corpus",
-        "daily_headline_scores",
         "daily_cluster_tfidf",
-        "daily_ai_enrichment",
+        "daily_headline_scores",
+        "daily_ai_enrichment"
+    ]
+    
+    for table in scratchpad_tables:
+        try:
+            cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")
+            if cursor.fetchone():
+                cursor.execute(f"DELETE FROM {table}")
+                print(f"  - 100% Emptied {table}.")
+        except sqlite3.Error as e:
+            print(f"  ⚠️ Error emptying {table}: {e}")
+
+    # --- 2. TRIM THE HEAVY CLUSTER MEMORY (7 Days Retention) ---
+    cutoff_7_days = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
+    print(f"\n🧹 Purging short-term memory older than 7 days ({cutoff_7_days})...")
+    
+    memory_tables_7d = [
+        "cluster_word_memory",
+        "daily_cluster_counts",
         "daily_ai_clusters"
     ]
 
-    for table in tables_to_clean:
+    for table in memory_tables_7d:
         try:
-            # Safe check to make sure the table exists before trying to delete
             cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")
             if cursor.fetchone():
-                cursor.execute(f"DELETE FROM {table} WHERE date < ?", (cutoff_date,))
-                deleted_rows = cursor.rowcount
-                print(f"  - Cleared {deleted_rows} old rows from {table}.")
+                cursor.execute(f"DELETE FROM {table} WHERE date < ?", (cutoff_7_days,))
+                print(f"  - Cleared {cursor.rowcount:,} old rows from {table}.")
         except sqlite3.Error as e:
             print(f"  ⚠️ Error cleaning {table}: {e}")
 
+    # --- 3. TRIM THE CORE BASELINE (30 Days Retention) ---
+    # --- 3. TRIM THE CORE BASELINE (30 Days Retention) ---
+    cutoff_30_days = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
+    print(f"\n🧠 Purging core IDF baseline older than 30 days ({cutoff_30_days})...")
+    
+    try:
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='rolling_30d_idf'")
+        if cursor.fetchone():
+            cursor.execute("DELETE FROM rolling_30d_idf WHERE date < ?", (cutoff_30_days,))
+            print(f"  - Cleared {cursor.rowcount:,} old rows from rolling_30d_idf.")
+    except sqlite3.Error as e:
+        print(f"  ⚠️ Error cleaning rolling_30d_idf: {e}")
+
     conn.commit()
 
-    # 4. The Critical Step: Compress the file
-    print("🗜️ Running VACUUM to compress the database (this may take a minute)...")
+    # --- 4. THE COMPRESSION ---
+    print("\n🗜️ Running VACUUM to compress the database (this will take a few minutes)...")
     start_vacuum = time.time()
     cursor.execute("VACUUM")
     conn.close()
@@ -58,11 +81,10 @@ def cleanup_database():
     vacuum_time = time.time() - start_vacuum
     print(f"✅ VACUUM complete in {vacuum_time:.2f} seconds.")
 
-    # 5. Calculate file size after cleanup
     size_after_mb = os.path.getsize(DB_PATH) / (1024 * 1024)
     saved_mb = size_before_mb - size_after_mb
     
-    print(f"📦 Database size after cleanup: {size_after_mb:.2f} MB")
+    print(f"\n📦 Database size after cleanup: {size_after_mb:.2f} MB")
     print(f"📉 Total space reclaimed: {saved_mb:.2f} MB")
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Success! Step 12 Complete.")
 

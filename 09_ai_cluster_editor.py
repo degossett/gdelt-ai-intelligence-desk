@@ -36,37 +36,29 @@ def generate_ai_briefs():
         print(f"❌ Error: {GUIDELINES_PATH} not found!")
         sys.exit(1)
 
-    # --- 2. FETCH THE AI'S MEMORY (YESTERDAY'S REPORT TITLES ONLY) ---
+    # --- 2. FETCH THE AI'S MEMORY (LAST 3 DAYS OF TOPIC TITLES) ---
     print("🧠 Checking database for previous report memory...")
-    # Safe check to see if the table even exists yet
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='daily_ai_clusters'")
     table_exists = cursor.fetchone()
     
-    yesterday_context = "No previous reports found. This is the first run."
+    recent_context = "No previous reports found. This is the first run."
     if table_exists:
+        # Fetch distinct topic names from the last 3 days
         cursor.execute('''
-            SELECT DISTINCT date FROM daily_ai_clusters 
-            WHERE date < ? 
-            ORDER BY date DESC LIMIT 1
-        ''', (today_str,))
-        last_date_row = cursor.fetchone()
+            SELECT DISTINCT date, topic_name 
+            FROM daily_ai_clusters 
+            WHERE date >= date(?, '-3 days') AND date < ?
+            ORDER BY date DESC
+        ''', (today_str, today_str))
         
-        if last_date_row:
-            last_date = last_date_row[0]
-            # ONLY fetch the topic names, skipping the summaries completely!
-            cursor.execute('''
-                SELECT topic_name 
-                FROM daily_ai_clusters 
-                WHERE date = ?
-            ''', (last_date,))
-            old_clusters = cursor.fetchall()
-            
-            if old_clusters:
-                yesterday_context = f"YESTERDAY'S TOPICS ({last_date}):\n"
-                for row in old_clusters:
-                    yesterday_context += f"- {row[0]}\n"
+        recent_clusters = cursor.fetchall()
+        
+        if recent_clusters:
+            recent_context = "RECENTLY REPORTED TOPICS (LAST 3 DAYS):\n"
+            for report_date, topic in recent_clusters:
+                recent_context += f"- [{report_date}] {topic}\n"
     
-    print(f"Loaded Memory Context:\n{yesterday_context}")
+    print(f"Loaded Memory Context:\n{recent_context}")
 
     # --- 3. GRAB THE ENRICHED HEADLINES (FROM SCRIPT 08) ---
     print("📥 Fetching today's AI-enriched headlines...")
@@ -103,9 +95,9 @@ def generate_ai_briefs():
     {editorial_wiki}
     --- END EDITORIAL WIKI ---
     
-    --- START HARD BLACKLIST (YESTERDAY'S NEWS) ---
-    {yesterday_context}
-    CRITICAL RULE: You are strictly forbidden from writing about the topics listed above. Do not include them in your output unless there is a MASSIVE, fundamentally new geopolitical development today. If it is just lingering syndication of yesterday's news, IGNORE IT completely.
+    --- START HARD BLACKLIST (RECENT NEWS) ---
+    {recent_context}
+    CRITICAL RULE: You are strictly forbidden from writing about the topics listed above. Do not include them in your output unless there is a MASSIVE, fundamentally new geopolitical development today. If it is just lingering syndication of recent news, IGNORE IT completely.
     --- END HARD BLACKLIST ---
     
     You MUST return your answer in strictly valid JSON format exactly matching this schema:
@@ -123,7 +115,7 @@ def generate_ai_briefs():
     user_prompt = f"Here is today's raw anomaly data. Synthesize this into the top 15 to 20 events based strictly on our editorial guidelines:\n{payload_json}"
 
     print("🚀 Sending payload to DeepSeek (This may take 30-60 seconds)...")
-    client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url="https://api.deepseek.com")
+    client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url="[https://api.deepseek.com](https://api.deepseek.com)")
     
     try:
         response = client.chat.completions.create(
@@ -148,9 +140,9 @@ def generate_ai_briefs():
             print(f"✂️ Python Enforcer deleted {len(raw_topics) - len(topics)} single-source clusters that broke the rules!")
 
         # --- 6. SAVE TO DATABASE ---
-        cursor.execute('DROP TABLE IF EXISTS daily_ai_clusters')
+        # Fixed the DROP TABLE bug so history actually persists!
         cursor.execute('''
-            CREATE TABLE daily_ai_clusters (
+            CREATE TABLE IF NOT EXISTS daily_ai_clusters (
                 date TEXT, 
                 topic_rank INTEGER, 
                 topic_name TEXT, 
