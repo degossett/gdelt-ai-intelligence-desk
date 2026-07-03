@@ -28,4 +28,4 @@ jobs:
 
       - name: 🧮 Run Stats Script
         # We run this natively on Ubuntu's default Python without Docker for lightning speed
-        run: python3 12_intelligence_stats.py
+        run: python3 13_intelligence_stats.py
