@@ -57,22 +57,9 @@ def cleanup_database():
         except sqlite3.Error as e:
             print(f"  ⚠️ Error cleaning {table}: {e}")
 
-    # --- 3. TRIM THE CORE BASELINE (30 Days Retention) ---
-    # --- 3. TRIM THE CORE BASELINE (30 Days Retention) ---
-    cutoff_30_days = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
-    print(f"\n🧠 Purging core IDF baseline older than 30 days ({cutoff_30_days})...")
-    
-    try:
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='rolling_30d_idf'")
-        if cursor.fetchone():
-            cursor.execute("DELETE FROM rolling_30d_idf WHERE date < ?", (cutoff_30_days,))
-            print(f"  - Cleared {cursor.rowcount:,} old rows from rolling_30d_idf.")
-    except sqlite3.Error as e:
-        print(f"  ⚠️ Error cleaning rolling_30d_idf: {e}")
-
     conn.commit()
 
-    # --- 4. THE COMPRESSION ---
+    # --- 3. THE COMPRESSION ---
     print("\n🗜️ Running VACUUM to compress the database (this will take a few minutes)...")
     start_vacuum = time.time()
     cursor.execute("VACUUM")
