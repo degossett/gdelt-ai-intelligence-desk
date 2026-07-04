@@ -115,7 +115,7 @@ def generate_ai_briefs():
     user_prompt = f"Here is today's raw anomaly data. Synthesize this into the top 15 to 20 events based strictly on our editorial guidelines:\n{payload_json}"
 
     print("🚀 Sending payload to DeepSeek (This may take 30-60 seconds)...")
-    client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url="[https://api.deepseek.com](https://api.deepseek.com)")
+    client = OpenAI(api_key=DEEPSEEK_API_KEY, base_url="https://api.deepseek.com")
     
     try:
         response = client.chat.completions.create(
