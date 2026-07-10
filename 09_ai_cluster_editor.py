@@ -95,9 +95,10 @@ def generate_ai_briefs():
     {editorial_wiki}
     --- END EDITORIAL WIKI ---
     
-    --- START HARD BLACKLIST (RECENT NEWS) ---
+    --- START HARD BLACKLIST (PAST 72 HOURS) ---
     {recent_context}
-    CRITICAL RULE: You are strictly forbidden from writing about the topics listed above. Do not include them in your output unless there is a MASSIVE, fundamentally new geopolitical development today. If it is just lingering syndication of recent news, IGNORE IT completely.
+    CRITICAL INSTRUCTION: The topics listed above have ALREADY been reported. You are STRICTLY FORBIDDEN from generating any clusters about these exact topics, their direct continuations, or lingering syndicated coverage. 
+    DO NOT use the "new development" excuse to bypass this rule. If an article maps to a blacklisted topic, completely discard it. It is perfectly acceptable and expected to return fewer total topics rather than repeating a blacklisted topic.
     --- END HARD BLACKLIST ---
     
     You MUST return your answer in strictly valid JSON format exactly matching this schema:
