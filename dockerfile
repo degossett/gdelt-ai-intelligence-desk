@@ -12,4 +12,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # When the container wakes up, run the orchestrator
-CMD ["python", "00_daily_runner.py"]
+CMD ["python", "00.0_run_pipeline.py"]
