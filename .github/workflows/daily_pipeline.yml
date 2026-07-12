@@ -37,7 +37,7 @@ jobs:
             -e EMAIL_APP_PASSWORD="${{ secrets.EMAIL_APP_PASSWORD }}" \
             -e MY_SECRET_EMAIL="${{ secrets.MY_SECRET_EMAIL }}" \
             -e SENDER_EMAIL="${{ secrets.SENDER_EMAIL }}" \
-            gdelt-ai-desk
+            gdelt-ai-desk python 00.0_run_pipeline.py
       
       - name: 📤 Upload Updated Database to Google Cloud
         run: |
